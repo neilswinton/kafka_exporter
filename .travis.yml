@@ -4,7 +4,6 @@ go_import_path: github.com/imduffy15/kafka_exporter
 env:
   global:
     - DOCKER_IMAGE_NAME=kafka_exporter
-    - DOCKER_IMAGE_TAG=v0.6.0
 services:
   - docker
 install: true

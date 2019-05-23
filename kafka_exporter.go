@@ -372,7 +372,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		}
 		groupIds := make([]string, 0)
 		for groupId := range groups.Groups {
-			if e.groupFilter.MatchString(groupId) {
+			if e.groupFilter.MatchString(groupId) && groupId != "" {
 				groupIds = append(groupIds, groupId)
 			}
 		}
