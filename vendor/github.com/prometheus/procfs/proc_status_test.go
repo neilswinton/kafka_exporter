@@ -18,7 +18,7 @@ import (
 )
 
 func TestProcStatus(t *testing.T) {
-	p, err := getProcFixtures(t).NewProc(26231)
+	p, err := getProcFixtures(t).Proc(26231)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,7 +33,8 @@ func TestProcStatus(t *testing.T) {
 		want int
 		have int
 	}{
-		{name: "pid", want: 26231, have: s.PID},
+		{name: "Pid", want: 26231, have: s.PID},
+		{name: "Tgid", want: 26231, have: s.TGID},
 		{name: "VmPeak", want: 58472 * 1024, have: int(s.VmPeak)},
 		{name: "VmSize", want: 58440 * 1024, have: int(s.VmSize)},
 		{name: "VmLck", want: 0 * 1024, have: int(s.VmLck)},
@@ -62,7 +63,7 @@ func TestProcStatus(t *testing.T) {
 }
 
 func TestProcStatusName(t *testing.T) {
-	p, err := getProcFixtures(t).NewProc(26231)
+	p, err := getProcFixtures(t).Proc(26231)
 	if err != nil {
 		t.Fatal(err)
 	}
