@@ -28,6 +28,7 @@ vet:
 
 build: promu
 	@echo ">> building binaries"
+	@echo ">> $(PROMU) build --prefix $(PREFIX)"
 	@$(PROMU) build --prefix $(PREFIX)
 
 crossbuild: promu
@@ -43,12 +44,11 @@ docker:
 	@docker build -t "$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)" .
 
 push:
-	@echo ">> pushing docker image, $(DOCKER_USERNAME),$(DOCKER_IMAGE_NAME),$(TAG)"
-	@docker login -u $(DOCKER_USERNAME) -p $(DOCKER_PASSWORD)
-	@docker tag "$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)" "$(DOCKER_USERNAME)/$(DOCKER_IMAGE_NAME):$(TAG)"
-	@docker tag "$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)" "$(DOCKER_USERNAME)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)"
-	@docker push "$(DOCKER_USERNAME)/$(DOCKER_IMAGE_NAME):$(TAG)"
-	@docker push "$(DOCKER_USERNAME)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)"
+	@echo ">> pushing docker image, $(DNX_REGISTRY),$(DOCKER_IMAGE_NAME),$(TAG)"
+	@docker tag "$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)" "$(DNX_REGISTRY)/$(DOCKER_IMAGE_NAME):$(TAG)"
+	@docker tag "$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)" "$(DNX_REGISTRY)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)"
+	@docker push "$(DNX_REGISTRY)/$(DOCKER_IMAGE_NAME):$(TAG)"
+	@docker push "$(DNX_REGISTRY)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)"
 
 release: promu github-release
 	@echo ">> pushing binary to github with ghr"

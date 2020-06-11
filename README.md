@@ -52,13 +52,10 @@ Compile
 ### Build Binary
 
 ```shell
-make
-```
-
-### Build Docker Image
-
-```shell
+go get github.com/datanomix/kafka_exporter
+make build
 make docker
+make push
 ```
 
 Docker Hub Image

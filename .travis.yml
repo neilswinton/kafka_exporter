@@ -1,6 +1,6 @@
 sudo: required
 language: go
-go_import_path: github.com/imduffy15/kafka_exporter
+go_import_path: github.com/datanomix/kafka_exporter
 env:
   global:
     - DOCKER_IMAGE_NAME=kafka_exporter
