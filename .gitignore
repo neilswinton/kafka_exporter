@@ -23,3 +23,10 @@ kafka_exporter
 
 # Test configuration
 test/
+
+# Emacs temp files   #
+######################
+*~
+[#]*[#]
+.\#*
+
