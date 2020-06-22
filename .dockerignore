@@ -1,5 +1,2 @@
-.*
-vendor
+.git*
 Dockerfile
-Makefile
-README.md

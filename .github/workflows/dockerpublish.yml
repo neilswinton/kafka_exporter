@@ -1,0 +1,89 @@
+name: Docker Build and Publish
+
+on:
+  push:
+    # Publish `master` as Docker `latest` image.
+    branches:
+      - master
+
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - releases/*
+
+    paths-ignore:
+    - 'docs/**'
+    - '.github/**'
+    - '*.md'
+
+  # Run tests for any PRs.
+  pull_request:
+
+env:
+  IMAGE_NAME: "kafka-prometheus-exporter"
+
+jobs:
+  # Run tests.
+  # See also https://docs.docker.com/docker-hub/builds/automated-testing/
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run tests
+        run: |
+            docker build . --file Dockerfile
+
+  # Push image to GitHub Packages.
+  # See also https://docs.docker.com/docker-hub/builds/
+  push:
+    # Ensure test job passes before pushing image.
+    needs: test
+
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startswith(github.ref, 'refs/tags') # only push for tags
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          # Get timestamp and put it in the environment
+          NOW="$(date --iso-8601=seconds)"
+          echo "::set-env name=NOW::$NOW"
+
+          docker build . --file Dockerfile --tag image          \
+                --build-arg BUILD_DATE="$(NOW)"                 \
+                --build-arg VCS_REF="${{ github.sha }}"         \
+                --build-arg VCS_URL="${{ github.repository }}"
+
+      - name: Log into registry
+        run: echo "${{ secrets.REPOSITORY_PASSWORD }}" | docker login ${{ secrets.REGISTRY }} -u ${{ secrets.REPOSITORY_USER }} --password-stdin
+
+      - name: Push image
+        run: |
+          IMAGE_ID="${{ secrets.REGISTRY }}/kafka-prometheus-exporter"
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+
+          # Remove leading releases/ from tag
+          [[ $VERSION =~ ^releases/* ]] && VERSION="$(basename $VERSION)"
+
+
+          docker tag image $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+          echo ${{ env.NOW }}
+
+          # Tag and push unique tag in case of accidents
+          UNIQUE="$(date +'%Y%m%d%H%m%S')-${{ github.sha }}"
+          docker tag image $IMAGE_ID:$UNIQUE
+          docker push $IMAGE_ID:$UNIQUE
